@@ -1,92 +1,166 @@
-import { useState } from 'react'
-import { useCrowdFunding } from '../hooks/useCrowdFunding'
+import { useState } from "react";
+import { useCrowdFunding } from "../hooks/useCrowdFunding";
 
 export default function CreateCampaign() {
-    const { createCampaign } = useCrowdFunding()
-    const [goal, setGoal] = useState('')
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [endDate, setEndDate] = useState('') // <- nouvelle valeur venant du calendar
+  const { createCampaign } = useCrowdFunding();
+  const [goal, setGoal] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
 
-    const handleSubmit = async e => {
-        e.preventDefault()
-        try {
-            // conversion endDate -> secondes restantes
-            const now = Math.floor(Date.now() / 1000) // en secondes
-            const chosenDate = Math.floor(new Date(endDate).getTime() / 1000)
-            const deadline = chosenDate - now
+  // 🔹 Upload image vers Cloudinary
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-            if (deadline <= 0) {
-                alert('Veuillez choisir une date ultérieure')
-                return
-            }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "crowdfunding_upload"); // preset Cloudinary
+    formData.append("cloud_name", "dbbw74aip"); // ton cloud name
 
-            const txHash = await createCampaign(goal, deadline, title, description)
-            alert(`Campagne créée ! TX Hash: ${txHash}`)
+    setUploading(true);
 
-            // reset
-            setGoal('')
-            setTitle('')
-            setDescription('')
-            setEndDate('')
-        } catch (err) {
-            console.error(err)
-            alert('Erreur lors de la création de la campagne')
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dbbw74aip/image/upload",
+        {
+          method: "POST",
+          body: formData,
         }
+      );
+
+      const data = await res.json();
+      setImage(data.secure_url);
+    } catch (err) {
+      console.error("Erreur upload image:", err);
+      alert("Échec de l’upload de l’image");
+    } finally {
+      setUploading(false);
     }
+  };
 
-    return (
-        <div className="p-6 border rounded-lg shadow-md bg-white">
-            <h2 className="text-xl font-bold mb-4">Créer une campagne</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Titre</legend>
-                    <input
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                        type="text"
-                        className="input input-bordered"
-                        placeholder="Donner un titre à votre campagne..."
-                        required
-                    />
-                </fieldset>
+  // 🔹 Convertir deadline (date) → timestamp en secondes
+  const convertDeadlineToTimestamp = (date) => {
+    return Math.floor(new Date(date).getTime() / 1000);
+  };
 
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Description</legend>
-                    <textarea
-                        className="textarea textarea-bordered h-24"
-                        placeholder="Décrivez votre campagne..."
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
-                        required
-                    />
-                </fieldset>
+  // 🔹 Soumission du formulaire
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const deadlineTimestamp = convertDeadlineToTimestamp(deadline);
 
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Objectif en WEI</legend>
-                    <input
-                        value={goal}
-                        onChange={e => setGoal(e.target.value)}
-                        type="number"
-                        className="input input-bordered"
-                        placeholder="Définissez votre objectif..."
-                        required
-                    />
-                </fieldset>
+      const txHash = await createCampaign(
+        goal,
+        deadlineTimestamp,
+        title,
+        description,
+        image // on passe aussi l’URL de l’image
+      );
 
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Date de fin</legend>
-                    <input
-                        type="datetime-local"
-                        value={endDate}
-                        onChange={e => setEndDate(e.target.value)}
-                        className="input input-bordered"
-                        required
-                    />
-                </fieldset>
+      alert(`✅ Campagne créée ! TX Hash: ${txHash}`);
 
-                <button className="btn btn-primary">Créer</button>
-            </form>
-        </div>
-    )
+      // Reset du form
+      setGoal("");
+      setDeadline("");
+      setTitle("");
+      setDescription("");
+      setImage("");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Erreur lors de la création de la campagne");
+    }
+  };
+
+  return (
+    <div className="flex justify-center mt-8">
+      <div className="w-full max-w-lg p-6 border rounded-2xl shadow-md bg-white">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          🎯 Créer une campagne
+        </h2>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Champ Titre */}
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Titre</legend>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+              placeholder="Donnez un titre à votre campagne..."
+              required
+            />
+          </fieldset>
+
+          {/* Champ Description */}
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Description</legend>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-3 border rounded-lg h-24 focus:ring focus:ring-blue-300"
+              placeholder="Décrivez votre campagne..."
+              required
+            ></textarea>
+          </fieldset>
+
+          {/* Champ Objectif */}
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Objectif (en WEI)</legend>
+            <input
+              type="number"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+              placeholder="Ex: 1000000000000000000 (1 ETH)"
+              required
+            />
+          </fieldset>
+
+          {/* Champ Deadline */}
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Deadline</legend>
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+              required
+            />
+          </fieldset>
+
+          {/* Champ Image */}
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Image</legend>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="w-full p-2"
+            />
+            {uploading && <p className="text-sm text-gray-500">⏳ Uploading...</p>}
+            {image && (
+              <img
+                src={image}
+                alt="Preview"
+                className="mt-3 w-full h-40 object-cover rounded-lg"
+              />
+            )}
+          </fieldset>
+
+          {/* Bouton Créer */}
+          <button
+            type="submit"
+            disabled={uploading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
+          >
+            🚀 Créer
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }
