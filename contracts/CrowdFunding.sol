@@ -9,6 +9,7 @@ contract CrowdFunding is ReentrancyGuard, Ownable {
     struct Campaign {
         string title;
         string description;
+        string image;
         address owner;
         uint goal;
         uint deadline;
@@ -30,13 +31,14 @@ contract CrowdFunding is ReentrancyGuard, Ownable {
         platformFeePercentage = _platformFeePercentage;
     }
 
-    function createCampaign(uint _goal, uint _deadline, string memory _title, string memory _description) public {
+    function createCampaign(uint _goal, uint _deadline, string memory _title, string memory _description, string memory _image) public {
         require(_goal > 0, "Goal must be > 0");
         require(_deadline > 0, "Deadline must be > 0");
 
         campaigns[campaignCount] = Campaign({
             title: _title,
             description: _description,
+            image: _image,
             owner: msg.sender,
             goal: _goal,
             deadline: block.timestamp + _deadline,
@@ -96,20 +98,27 @@ contract CrowdFunding is ReentrancyGuard, Ownable {
     }
 
     function getCampaignInfo(uint _campaignId) public view returns (
-        address campaignOwner,
-        uint goal,
-        uint deadline,
-        uint amountRaised,
-        bool fundsWithdrawn
-    ) {
-        require(_campaignId < campaignCount, "Invalid campaign ID");
-        Campaign storage campaign = campaigns[_campaignId];
-        return (
-            campaign.owner,
-            campaign.goal,
-            campaign.deadline,
-            campaign.amountRaised,
-            campaign.fundsWithdrawn
-        );
-    }
+    string memory title,
+    string memory description,
+    string memory image,
+    address campaignOwner,
+    uint goal,
+    uint deadline,
+    uint amountRaised,
+    bool fundsWithdrawn
+) {
+    require(_campaignId < campaignCount, "Invalid campaign ID");
+    Campaign storage campaign = campaigns[_campaignId];
+    return (
+        campaign.title,
+        campaign.description,
+        campaign.image,
+        campaign.owner,
+        campaign.goal,
+        campaign.deadline,
+        campaign.amountRaised,
+        campaign.fundsWithdrawn
+    );
+}
+
 }
