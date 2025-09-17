@@ -75,8 +75,8 @@ export default function CreateCampaign() {
   };
 
   return (
-    <div className="flex justify-center mt-8">
-      <div className="w-full max-w-lg p-6 border rounded-2xl shadow-md bg-white">
+    <div className="flex justify-center mt-8 ">
+      <div className="w-full max-w-lg p-6 border rounded-2xl shadow-xl bg-white">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
           🎯 Créer une campagne
         </h2>

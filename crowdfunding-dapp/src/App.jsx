@@ -4,21 +4,29 @@ import CampaignDetails from "./components/CampaignDetails";
 import Contribute from "./components/Contribute";
 import Withdraw from "./components/Withdraw";
 import Refund from "./components/Refund";
+import Layout from "./components/Layout";
+import { Router, Routes, Route } from "react-router-dom";
+import MyContributions from "./components/MyContribution";
+import MyCampaigns from "./components/MyCampaigns";
 
 function App() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">DApp CrowdFunding</h1>
-      <CreateCampaign />
-      <hr className="my-6" />
-      <CampaignList />
-      {/* Exemple : détails d'une campagne */}
-      {/* <CampaignDetails campaignId={0} />
-      <Contribute campaignId={0} />
-      <Withdraw campaignId={0} />
-      <Refund campaignId={0} /> */}
-    </div>
-  );
+   
+
+
+      <Layout>
+        <Routes>
+          <Route path="/" element={<CampaignList />} />
+          <Route path="/create" element={<CreateCampaign />} />
+          <Route path="/campaign/:id" element={<CampaignDetails />} />
+          <Route path="/campaign/:id/contribute" element={<Contribute />} />
+          <Route path="/my-contributions" element={<MyContributions/>} />
+          <Route path="/my-campaigns" element={<MyCampaigns/>} />
+        </Routes>
+      </Layout>
+
+
+);
 }
 
 export default App;
