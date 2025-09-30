@@ -24,7 +24,7 @@ export const useCrowdFunding = () => {
       deadlineNumber,
       title,
       description,
-      image // <-- nouveau paramètre
+      image
     );
 
     await tx.wait();
@@ -41,10 +41,63 @@ export const useCrowdFunding = () => {
     return tx.hash;
   };
 
-  // récupérer infos d’une campagne
+  // récupérer infos d'une campagne
   const getCampaignInfo = async (campaignId) => {
     const contract = await getContract();
     return await contract.getCampaignInfo(campaignId);
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer les infos étendues d'une campagne
+  const getCampaignInfoExtended = async (campaignId) => {
+    const contract = await getContract();
+    return await contract.getCampaignInfoExtended(campaignId);
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer le nombre de contributeurs d'une campagne
+  const getContributorCount = async (campaignId) => {
+    const contract = await getContract();
+    const count = await contract.getContributorCount(campaignId);
+    return Number(count);
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer la liste des contributeurs d'une campagne
+  const getCampaignContributors = async (campaignId) => {
+    const contract = await getContract();
+    return await contract.getCampaignContributors(campaignId);
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer le montant contribué par un address spécifique
+  const getContributionAmount = async (campaignId, contributorAddress) => {
+    const contract = await getContract();
+    const amount = await contract.getContributionAmount(campaignId, contributorAddress);
+    return ethers.formatEther(amount);
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer toutes les contributions d'une campagne
+  const getCampaignContributions = async (campaignId) => {
+    const contract = await getContract();
+    const [contributors, amounts] = await contract.getCampaignContributions(campaignId);
+
+    // Formater les données pour le frontend
+    const contributions = contributors.map((contributor, index) => ({
+      address: contributor,
+      amount: ethers.formatEther(amounts[index]),
+      amountWei: amounts[index].toString()
+    }));
+
+    return contributions;
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer les campagnes de l'utilisateur connecté
+  const getMyCampaigns = async () => {
+    const contract = await getContract();
+    return await contract.getMyCampaigns();
+  };
+
+  // 🔹 NOUVELLE FONCTION: Récupérer les contributions de l'utilisateur connecté
+  const getMyContributions = async () => {
+    const contract = await getContract();
+    return await contract.getMyContributions();
   };
 
   // retirer les fonds
@@ -67,6 +120,13 @@ export const useCrowdFunding = () => {
     createCampaign,
     contribute,
     getCampaignInfo,
+    getCampaignInfoExtended,
+    getContributorCount,
+    getCampaignContributors,
+    getContributionAmount,
+    getCampaignContributions,
+    getMyCampaigns,
+    getMyContributions,
     withdrawFunds,
     getRefund,
   };
