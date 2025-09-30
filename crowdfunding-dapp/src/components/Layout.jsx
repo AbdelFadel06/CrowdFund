@@ -6,7 +6,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex flex-col min-h-screen bg-white ">
       {/* Navbar */}
-      <nav className="  text-gray-900 px-10 py-4 shadow-md flex justify-between items-center">
+      <nav className="  text-gray-900 px-10 py-4 shadow-md flex justify-between items-center w-full fixed z-10 bg-white">
         <div className="text-2xl font-bold">
           <Link to="/" className="text-purple-500">CrowdFunding</Link>
         </div>
@@ -19,7 +19,7 @@ export default function Layout({ children }) {
       </nav>
 
       {/* Contenu central */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 mt-15 z-0">
         {children}
       </main>
 

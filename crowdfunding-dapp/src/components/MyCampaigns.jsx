@@ -128,7 +128,7 @@ export default function MyCampaigns() {
                 </button>
             </div>
 
-            <h1 className="text-2xl font-bold text-blue-600 mb-6">Mes Campagnes</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Mes Campagnes</h1>
             {!account ? (
                 <p className="text-gray-600">Connectez MetaMask pour voir vos campagnes.</p>
             ) : campaigns.length === 0 ? (
