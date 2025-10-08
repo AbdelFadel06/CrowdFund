@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCrowdFunding } from '../hooks/useCrowdFunding'
 import { useNavigate } from 'react-router-dom'
+import { ethers } from 'ethers' // ⬅️ IMPORTANT: Ajouter cette importation
 
 export default function CreateCampaign() {
     const { createCampaign } = useCrowdFunding()
@@ -60,7 +61,19 @@ export default function CreateCampaign() {
         return Math.floor(dateObj.getTime() / 1000)
     }
 
-    // 🔹 Soumission du formulaire
+    // 🔹 Fonction pour convertir ETH en Wei
+    const convertEthToWei = (ethValue) => {
+        try {
+            // Utiliser ethers.js pour convertir proprement
+            return ethers.parseEther(ethValue.toString()).toString()
+        } catch (error) {
+            console.error('Erreur conversion ETH vers Wei:', error)
+            // Fallback: conversion manuelle
+            return Math.floor(parseFloat(ethValue) * 10**18).toString()
+        }
+    }
+
+    // 🔹 Soumission du formulaire - CORRIGÉ
     const handleSubmit = async e => {
         e.preventDefault()
 
@@ -70,13 +83,22 @@ export default function CreateCampaign() {
             return
         }
 
+        // Validation du montant
+        if (parseFloat(goal) <= 0) {
+            alert('❌ Le montant doit être supérieur à 0')
+            return
+        }
+
         setCreating(true)
 
         try {
             const deadlineTimestamp = convertDeadlineToTimestamp(deadline)
 
+            // ⬅️ CORRECTION: Convertir ETH en Wei
+            const goalInWei = convertEthToWei(goal)
+
             const txHash = await createCampaign(
-                goal,
+                goalInWei, // ⬅️ Maintenant en Wei, pas en ETH
                 deadlineTimestamp,
                 title,
                 description,
@@ -91,8 +113,8 @@ export default function CreateCampaign() {
             }, 2000)
 
         } catch (err) {
-            console.error(err)
-            alert('❌ Erreur lors de la création de la campagne')
+            console.error('Erreur détaillée:', err)
+            alert('❌ Erreur lors de la création de la campagne: ' + err.message)
         } finally {
             setCreating(false)
         }
@@ -190,7 +212,7 @@ export default function CreateCampaign() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Champ Objectif */}
+                                    {/* Champ Objectif - CORRIGÉ */}
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             Objectif (ETH) *
@@ -206,7 +228,7 @@ export default function CreateCampaign() {
                                             required
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {goal ? `≈ ${(parseFloat(goal) * 1000000000000000000).toLocaleString()} WEI` : '1 ETH = 1 000 000 000 000 000 000 WEI'}
+                                            {goal ? `≈ ${ethers.formatEther(ethers.parseEther(goal.toString()))} WEI` : '1 ETH = 1 000 000 000 000 000 000 WEI'}
                                         </p>
                                     </div>
 

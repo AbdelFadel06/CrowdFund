@@ -14,7 +14,7 @@ export default function Layout({ children }) {
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/my-campaigns" className="hover:underline">My Campaigns</Link>
           <Link to="/my-contributions" className="hover:underline">My Contributions</Link>
-          <Link to="/create" className="hover:underline">Create Campaign</Link>
+          <Link to="/create" className="hover:bg-blue-500 bg-blue-400 px-3 py-2 rounded-2xl">Create Campaign</Link>
         </div>
       </nav>
 
